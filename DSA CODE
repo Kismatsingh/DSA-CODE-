@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_URL_LENGTH 100
+#define MAX_PAGES 100
+
+// Structure to represent a page in the browser history
+struct BrowserPage {
+    char url[MAX_URL_LENGTH];
+};
+
+// Structure to represent the browser
+struct Browser {
+    struct BrowserPage pages[MAX_PAGES]; // Array to store browsing history
+    int top; // Index of the top of the history stack
+};
+
+// Function to push a page onto the stack
+void push(struct Browser *browser, const char *url) {
+    if (browser->top < MAX_PAGES - 1) {
+        strcpy(browser->pages[++(browser->top)].url, url);
+    }
+}
+
+// Function to pop a page from the stack
+struct BrowserPage *pop(struct Browser *browser) {
+    static struct BrowserPage empty_page;
+    if (browser->top >= 0) {
+        return &(browser->pages[(browser->top)--]);
+    }
+    return &empty_page;
+}
+
+// Function to navigate back to the previous page
+void back(struct Browser *browser);
+
+// Function to navigate to a new URL
+void go_to(struct Browser *browser, const char *url) {
+    printf("Navigating to %s\n", url);
+    push(browser, url);
+}
+
+// Function to navigate back to the previous page
+void back(struct Browser *browser) {
+    struct BrowserPage *current_page = pop(browser);
+    if (strcmp(current_page->url, "") != 0) {
+        printf("Going back to %s\n", browser->pages[browser->top].url);
+    }
+}
+
+int main() {
+    struct Browser browser;
+    browser.top = -1;
+
+    // Example usage
+    go_to(&browser, "https://www.example.com");
+    go_to(&browser, "https://www.example.com/page1");
+    go_to(&browser, "https://www.example.com/page2");
+
+    back(&browser);  // Should go back to https://www.example.com/page1
+    back(&browser);  // Should go back to https://www.example.com
+    back(&browser);  // Should indicate no more pages to go back
+
+    return 0;
+}
